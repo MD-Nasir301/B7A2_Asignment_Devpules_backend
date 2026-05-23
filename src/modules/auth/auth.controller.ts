@@ -15,7 +15,29 @@ const registerUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Something went wrong";
+      error instanceof Error ? error.message : "User registration failed";
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: message,
+      data: error,
+    });
+  }
+};
+
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { result, token } = await authService.loginUserFromDB(req.body);
+    const user = result.rows[0];
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Login successful",
+      data: { token, user },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Login Failed";
     sendResponse(res, {
       statusCode: 400,
       success: false,
@@ -27,4 +49,5 @@ const registerUser = async (req: Request, res: Response) => {
 
 export const authController = {
   registerUser,
+  loginUser,
 };
