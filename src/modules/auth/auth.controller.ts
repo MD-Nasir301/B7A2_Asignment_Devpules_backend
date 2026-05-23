@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
-import { userService } from "./user.service";
+import { authService } from "./auth.service";
 import sendResponse from "../../utility/sendResponse";
-import type { IUser } from "./user.interface";
+import type { IUser } from "./auth.interface";
 
 const registerUser = async (req: Request, res: Response) => {
   try {
-    const result = await userService.registerUserIntoDB(req.body);
+    const result = await authService.registerUserIntoDB(req.body);
 
     sendResponse(res, {
       statusCode: 201,
@@ -25,6 +25,6 @@ const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-export const userConroller = {
+export const authController = {
   registerUser,
 };

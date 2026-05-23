@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { db } from "../../db";
-import type { IUser } from "./user.interface";
+import type { IUser } from "./auth.interface";
 
 const registerUserIntoDB = async (payload: IUser) => {
   const { name, email, password, role = "contributor" } = payload;
@@ -17,6 +17,6 @@ const registerUserIntoDB = async (payload: IUser) => {
   return result;
 };
 
-export const userService = {
+export const authService = {
   registerUserIntoDB,
 };
