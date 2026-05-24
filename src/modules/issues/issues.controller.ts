@@ -142,8 +142,73 @@ const getSingleIssue = async (req: Request, res: Response) => {
   }
 };
 
+const updateIssue = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, description, type } = req.body;
+
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    const result = await db.query(`SELECT * FROM issues WHERE id = $1;`, [id]);
+    const issue = result.rows[0];
+
+    if (!issue) {
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found!",
+      });
+      return;
+    }
+
+    if (userRole !== "maintainer") {
+      if (issue.reporter_id !== userId) {
+        sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can only update your own issues!",
+        });
+        return;
+      }
+
+      if (issue.status !== "open") {
+        sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can only update issues that are currently 'open'!",
+        });
+        return;
+      }
+    }
+
+    const updatedIssue = await issuesService.updateIssueInDB(id as string, {
+      title,
+      description,
+      type,
+    });
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue updated successfully",
+      data: updatedIssue,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch issue";
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: errorMessage,
+      data: error,
+    });
+  }
+};
+
 export const issueController = {
   getAllIssues,
   createIssue,
-   getSingleIssue,
+  getSingleIssue,
+  updateIssue,
 };

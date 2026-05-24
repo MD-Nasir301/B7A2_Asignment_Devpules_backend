@@ -13,7 +13,13 @@ export interface IIssue extends IIssuesInput {
 }
 
 export interface IIssueFilters {
-  sort?: 'newest' | 'oldest';
-  type?: 'bug' | 'feature_request';
-  status?: 'open' | 'in_progress' | 'resolved';
+  sort?: "newest" | "oldest";
+  type?: "bug" | "feature_request";
+  status?: "open" | "in_progress" | "resolved";
+}
+
+export interface IIssueUpdate {
+  title?: string;
+  description?: string;
+  type?: string;
 }

@@ -1,5 +1,10 @@
+import { runInNewContext } from "vm";
 import { db } from "../../db";
-import type { IIssueFilters, IIssuesInput } from "./issues.interface";
+import type {
+  IIssueFilters,
+  IIssuesInput,
+  IIssueUpdate,
+} from "./issues.interface";
 
 export async function createIssueInDB(payload: IIssuesInput) {
   const { title, description, type } = payload;
@@ -75,8 +80,26 @@ const getSingleIssueFromDB = async (id: string) => {
   return issueWithReporter;
 };
 
+const updateIssueInDB = async (id: string, payload: IIssueUpdate) => {
+  const { title, description, type } = payload;
+
+  const query = `
+      UPDATE issues 
+      SET 
+      title = COALESCE($1, title),
+      description = COALESCE($2, description), 
+      type = COALESCE($3, type),
+      updated_at = NOW()
+      WHERE id = $4 RETURNING *;
+`;
+  const values = [title, description, type, id];
+  const result = await db.query(query, values);
+  return result.rows[0];
+};
+
 export const issuesService = {
   createIssueInDB,
   getAllIssuesFromDB,
   getSingleIssueFromDB,
+  updateIssueInDB,
 };
