@@ -45,13 +45,38 @@ const getAllIssuesFromDB = async (filters: IIssueFilters) => {
   return result.rows;
 };
 
-const getIssueByIdFromDB = async (id: string) => {
+const getSingleIssueFromDB = async (id: string) => {
   const result = await db.query(`SELECT * FROM issues WHERE id = $1;`, [id]);
-  return result.rows[0];
+  const issue = result.rows[0];
+
+  if (!issue) {
+    return null;
+  }
+
+  const reporterDetails = await db.query(`SELECT * FROM users WHERE id = $1;`, [
+    issue.reporter_id,
+  ]);
+  const reporter = reporterDetails.rows[0];
+
+  const issueWithReporter = {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter: {
+      id: reporter?.id ?? "Reporter ID Not Found in Database",
+      name: reporter?.name ?? "Unknown Reporter",
+      role: reporter?.role ?? "Unknown Role",
+    },
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
+  return issueWithReporter;
 };
 
 export const issuesService = {
   createIssueInDB,
   getAllIssuesFromDB,
-  getIssueByIdFromDB,
+  getSingleIssueFromDB,
 };

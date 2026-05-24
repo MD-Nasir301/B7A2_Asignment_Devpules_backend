@@ -4,6 +4,44 @@ import type { IIssueFilters } from "./issues.interface";
 import { db } from "../../db";
 import sendResponse from "../../utility/sendResponse";
 
+const createIssue = async (req: Request, res: Response) => {
+  try {
+    const { title, description, type } = req.body;
+    const reporter_id = req.user?.id;
+
+    if (!reporter_id) {
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Unauthorized to create issue",
+      });
+      return;
+    }
+    const issue = await issuesService.createIssueInDB({
+      title,
+      description,
+      type,
+      reporter_id,
+    });
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Issue created successfully",
+      data: issue,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to create issue";
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: errorMessage,
+      data: error,
+    });
+  }
+};
+
 const getAllIssues = async (req: Request, res: Response) => {
   try {
     const filters = {
@@ -73,48 +111,20 @@ const getAllIssues = async (req: Request, res: Response) => {
   }
 };
 
-const createIssue = async (req: Request, res: Response) => {
+const getSingleIssue = async (req: Request, res: Response) => {
   try {
-    const { title, description, type } = req.body;
-    const reporter_id = req.user?.id;
+    const issueId = req.params.id;
+    const issue = await issuesService.getSingleIssueFromDB(issueId as string);
 
-    if (!reporter_id) {
+    if (!issue) {
       sendResponse(res, {
-        statusCode: 401,
+        statusCode: 404,
         success: false,
-        message: "Unauthorized to create issue",
+        message: "Issue not found",
       });
       return;
     }
-    const issue = await issuesService.createIssueInDB({
-      title,
-      description,
-      type,
-      reporter_id,
-    });
 
-    sendResponse(res, {
-      statusCode: 201,
-      success: true,
-      message: "Issue created successfully",
-      data: issue,
-    });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create issue";
-    sendResponse(res, {
-      statusCode: 400,
-      success: false,
-      message: errorMessage,
-      data: error,
-    });
-  }
-};
-
-const getIssueById = async (req: Request, res: Response) => {
-  try {
-    const issueId = req.params.id;
-    const issue = await issuesService.getIssueByIdFromDB(issueId as string);
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -135,5 +145,5 @@ const getIssueById = async (req: Request, res: Response) => {
 export const issueController = {
   getAllIssues,
   createIssue,
-  getIssueById,
+   getSingleIssue,
 };
