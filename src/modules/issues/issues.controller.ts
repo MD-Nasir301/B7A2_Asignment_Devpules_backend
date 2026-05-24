@@ -10,6 +10,22 @@ const createIssue = async (req: Request, res: Response) => {
     const { title, description, type } = req.body;
     const reporter_id = req.user?.id;
 
+    if (
+      !title ||
+      title.trim() === "" ||
+      !description ||
+      description.trim() === "" ||
+      !type ||
+      type.trim() === ""
+    ) {
+      sendResponse(res, {
+        statusCode: 400,
+        success: false,
+        message: "Title, description and type are required to create an issue",
+      });
+      return;
+    }
+
     if (!reporter_id) {
       sendResponse(res, {
         statusCode: 401,
