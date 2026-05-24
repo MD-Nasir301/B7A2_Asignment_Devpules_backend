@@ -6,6 +6,7 @@ import express, {
 } from "express";
 import { authRoute } from "./modules/auth/auth.router";
 import { issuesRoute } from "./modules/issues/issues.router";
+import cors from "cors";
 
 const app: Application = express();
 
@@ -14,6 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth/", authRoute);
 app.use("/api/issues/", issuesRoute);
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  }),
+);
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
