@@ -1,8 +1,9 @@
-import type { Request, Response } from "express";
+import { response, type Request, type Response } from "express";
 import { issuesService } from "./issues.service";
 import type { IIssueFilters } from "./issues.interface";
 import { db } from "../../db";
 import sendResponse from "../../utility/sendResponse";
+import type { SrvRecord } from "dns";
 
 const createIssue = async (req: Request, res: Response) => {
   try {
@@ -206,9 +207,52 @@ const updateIssue = async (req: Request, res: Response) => {
   }
 };
 
+const deleteIssue = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userRole = req.user?.role;
+
+    if (userRole !== "maintainer") {
+      sendResponse(res, {
+        statusCode: 403,
+        success: false,
+        message: "Access denied! Only maintainers can delete issues.",
+      });
+      return;
+    }
+
+    const deletedIssue = await issuesService.deleteIssueFromDB(id as string);
+
+    if (!deletedIssue) {
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found!",
+      });
+      return;
+    }
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch issue";
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: errorMessage,
+      data: error,
+    });
+  }
+};
+
 export const issueController = {
   getAllIssues,
   createIssue,
   getSingleIssue,
   updateIssue,
+  deleteIssue,
 };
