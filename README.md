@@ -4,7 +4,7 @@ A collaborative platform for software teams to report bugs, suggest features, an
 
 ## Live URL
 
-- **Backend Deployment:** 
+- **Backend Deployment:** https://devpules-zeta.vercel.app/
 
 ---
 

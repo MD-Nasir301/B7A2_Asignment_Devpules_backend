@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from "express";
-import config from "./config/index";
+import config from "./config";
 import { initDB } from "./db";
 import app from "./app";
 
